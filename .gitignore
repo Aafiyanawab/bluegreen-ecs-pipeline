@@ -1,4 +1,19 @@
+# Node
 node_modules/
+npm-debug.log
+
+# Environment variables - NEVER push these
 .env
+
+# Terraform state - contains sensitive data
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+
+# Logs
 *.log
+
+# OS files
 .DS_Store
+Thumbs.db
