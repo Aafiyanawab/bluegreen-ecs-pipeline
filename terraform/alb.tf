@@ -64,3 +64,22 @@ resource "aws_lb_listener" "main" {
     target_group_arn = aws_lb_target_group.blue.arn
   }
 }
+
+# Listener Rule for Green Target Group
+# This attaches green to the ALB so ECS can associate with it
+resource "aws_lb_listener_rule" "green" {
+  listener_arn = aws_lb_listener.main.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.green.arn
+  }
+
+  condition {
+    http_header {
+      http_header_name = "X-Deploy-Target"
+      values           = ["green"]
+    }
+  }
+}

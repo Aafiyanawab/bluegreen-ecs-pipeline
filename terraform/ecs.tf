@@ -1,3 +1,17 @@
+# ECR Repository
+resource "aws_ecr_repository" "app" {
+  name                 = var.ecr_repo
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name = var.ecr_repo
+  }
+}
+
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "bluegreen-cluster"
@@ -144,5 +158,9 @@ resource "aws_ecs_service" "green" {
     container_port   = var.app_port
   }
 
-  depends_on = [aws_lb_listener.main]
+  depends_on = [
+    aws_lb_listener.main,
+    aws_lb_target_group.green,
+    aws_lb.main
+  ]
 }
