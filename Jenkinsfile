@@ -43,19 +43,16 @@ pipeline {
                     string(credentialsId: 'AWS_ACCOUNT_ID', variable: 'ACCOUNT_ID')
                 ]) {
                     sh '''
-                        aws ecr get-login-password --region us-east-1 > /tmp/ecr-password.txt
-                        cat /tmp/ecr-password.txt | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
-                        rm /tmp/ecr-password.txt
+                        ECR_REGISTRY=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+                        docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
+                        docker push $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
+                        docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:latest
+                        docker push $ECR_REGISTRY/bluegreen-app:latest
                     '''
-                    sh """
-                        docker tag ${ECR_REPO}:${IMAGE_TAG} \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
-                        docker push \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
-                        docker tag ${ECR_REPO}:${IMAGE_TAG} \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:latest
-                        docker push \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:latest
-                    """
                 }
             }
-        }   
+        }
 
         stage('Deploy Green') {
             steps {
