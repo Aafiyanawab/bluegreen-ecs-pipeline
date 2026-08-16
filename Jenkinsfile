@@ -38,24 +38,24 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials'
-                ]]) {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials'],
+                    string(credentialsId: 'AWS_ACCOUNT_ID', variable: 'ACCOUNT_ID')
+                ]) {
                     sh '''
                         aws ecr get-login-password --region us-east-1 > /tmp/ecr-password.txt
-                        cat /tmp/ecr-password.txt | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com
+                        cat /tmp/ecr-password.txt | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
                         rm /tmp/ecr-password.txt
                     '''
                     sh """
-                        docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_URI}:${IMAGE_TAG}
-                        docker push ${ECR_URI}:${IMAGE_TAG}
-                        docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_URI}:latest
-                        docker push ${ECR_URI}:latest
+                        docker tag ${ECR_REPO}:${IMAGE_TAG} \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+                        docker push \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+                        docker tag ${ECR_REPO}:${IMAGE_TAG} \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:latest
+                        docker push \${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPO}:latest
                     """
                 }
             }
-        }
+        }   
 
         stage('Deploy Green') {
             steps {
