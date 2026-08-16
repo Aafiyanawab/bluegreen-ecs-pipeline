@@ -44,7 +44,8 @@ pipeline {
                 ]) {
                     sh '''
                         ECR_REGISTRY=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
-                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+                        LOGIN_CMD=$(aws ecr get-login-password --region us-east-1)
+                        echo $LOGIN_CMD | docker login --username AWS --password-stdin $ECR_REGISTRY
                         docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
                         docker push $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
                         docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:latest
