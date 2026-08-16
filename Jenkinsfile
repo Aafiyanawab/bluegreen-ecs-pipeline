@@ -38,18 +38,19 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials'],
-                    string(credentialsId: 'AWS_ACCOUNT_ID', variable: 'ACCOUNT_ID')
-                ]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials'
+                ]]) {
                     sh '''
-                        ECR_REGISTRY=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
-                        LOGIN_CMD=$(aws ecr get-login-password --region us-east-1)
-                        echo $LOGIN_CMD | docker login --username AWS --password-stdin $ECR_REGISTRY
-                        docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
-                        docker push $ECR_REGISTRY/bluegreen-app:$BUILD_NUMBER
-                        docker tag bluegreen-app:$BUILD_NUMBER $ECR_REGISTRY/bluegreen-app:latest
-                        docker push $ECR_REGISTRY/bluegreen-app:latest
+                        set -e
+                        aws ecr get-login-password --region us-east-1 > /tmp/ecr_pass.txt
+                        docker login --username AWS --password-stdin 129346407807.dkr.ecr.us-east-1.amazonaws.com < /tmp/ecr_pass.txt
+                        rm -f /tmp/ecr_pass.txt
+                        docker tag bluegreen-app:$BUILD_NUMBER 129346407807.dkr.ecr.us-east-1.amazonaws.com/bluegreen-app:$BUILD_NUMBER
+                        docker push 129346407807.dkr.ecr.us-east-1.amazonaws.com/bluegreen-app:$BUILD_NUMBER
+                        docker tag bluegreen-app:$BUILD_NUMBER 129346407807.dkr.ecr.us-east-1.amazonaws.com/bluegreen-app:latest
+                        docker push 129346407807.dkr.ecr.us-east-1.amazonaws.com/bluegreen-app:latest
                     '''
                 }
             }
