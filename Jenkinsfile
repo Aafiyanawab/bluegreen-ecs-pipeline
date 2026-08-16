@@ -21,8 +21,7 @@ pipeline {
         stage('Test') {
             steps {
                 dir('app') {
-                    sh 'npm install'
-                    sh 'npm test'
+                    sh "docker run --rm -v \$(pwd):/app -w /app node:lts-alpine sh -c 'npm install && npm test'"
                 }
             }
         }
