@@ -1,4 +1,4 @@
-# 🔵🟢 Blue-Green Deployment Pipeline on AWS ECS Fargate
+# 🔵 Blue-Green Deployment Pipeline on AWS ECS Fargate 🟢
 
 ![AWS](https://img.shields.io/badge/AWS-232F3E?logo=amazonaws\&logoColor=white)
 ![Amazon ECS](https://img.shields.io/badge/Amazon%20ECS-FF9900?logo=amazonaws\&logoColor=white)
@@ -28,7 +28,7 @@ The project uses:
 * **Amazon ECS Fargate** for running containers
 * **Application Load Balancer** for traffic routing
 * **Terraform** for Infrastructure as Code
-* **Jest + Supertest** for automated application testing
+* **Jest + Supertest** for   application testing
 
 The project uses separate **Blue and Green ECS services** with separate target groups. Jenkins deploys the new version to Green, waits for the Green service to stabilize, and then updates the ALB listener to route production traffic to Green.
 
@@ -102,59 +102,6 @@ Green Becomes Live
 
 ---
 
-## 🔵🟢 What is Blue-Green Deployment?
-
-Blue-Green deployment maintains two application environments during a release:
-
-* 🔵 **Blue** — the current version serving production traffic
-* 🟢 **Green** — the new version being deployed and validated
-
-Instead of immediately replacing Blue, the new version is deployed separately to Green.
-
-### Before Deployment
-
-```text
-Users
-  │
-  ▼
- ALB
-  │
-  ▼
-🔵 Blue
-v1.0.0
-```
-
-### During Deployment
-
-```text
-              ALB
-               │
-        ┌──────┴──────┐
-        ▼             ▼
-     🔵 Blue       🟢 Green
-      v1.0.0         v1.1.0
-     Current           New
-```
-
-Green is deployed and checked while Blue remains available.
-
-### After Successful Validation
-
-```text
-Users
-  │
-  ▼
- ALB
-  │
-  ▼
-🟢 Green
-v1.1.0
-```
-
-In this project, Jenkins performs the final ALB listener update that changes production traffic from the Blue target group to the Green target group.
-
----
-
 ## 🔄 CI/CD Pipeline
 
 ### Continuous Integration
@@ -186,25 +133,11 @@ Wait for ECS Service Stability
           ↓
 Switch ALB Traffic
 ```
-
 ---
-
 ## 🧪 Automated Testing
 
-The application includes Jest and Supertest integration tests that run before the Docker image is built.
-
-Current tests verify:
-
-```text
-✓ GET / returns HTTP 200
-✓ GET /health returns HTTP 200
-✓ /health returns a healthy status
-✓ GET /version returns a version field
-✓ /version returns the deployment color
-✓ Unknown routes return HTTP 404
-✓ Version follows the expected format
-✓ Deployment color is valid
-```
+Jest + Supertest integration tests run before deployment, validating the application, health endpoint, version, deployment color, and invalid routes.
+**8 tests act as a CI quality gate — if tests fail, the pipeline stops before deployment.**
 
 The tests act as a **CI quality gate**.
 
@@ -327,42 +260,6 @@ bluegreen-ecs-pipeline/
 ├── .gitignore
 └── README.md
 ```
-
----
-
-## ☁️ AWS Infrastructure
-
-The AWS infrastructure is provisioned using Terraform.
-
-### Networking
-
-* VPC
-* Public subnets
-* Internet Gateway
-* Route tables
-* Security groups
-
-### Load Balancing
-
-* Application Load Balancer
-* Blue target group
-* Green target group
-* ALB listener and routing configuration
-
-### Container Infrastructure
-
-* ECS cluster
-* Blue ECS service
-* Green ECS service
-* ECS task definitions
-* Fargate tasks
-* ECR repository
-
-### IAM & Logging
-
-* ECS task execution IAM role
-* CloudWatch log group
-
 ---
 
 # 📸 Screenshots
@@ -465,14 +362,6 @@ docker build -t bluegreen-app:v1 .
 
 ---
 
-## 🔄 Local Blue-Green Simulation
-
-The `local-simulation/` directory provides a local environment for understanding Blue-Green traffic routing without requiring AWS.
-
-It uses Docker containers and Nginx to simulate routing between application versions.
-
----
-
 ## 🚀 Deploy Infrastructure
 
 Initialize Terraform:
@@ -508,57 +397,14 @@ The project follows several basic container and cloud security practices:
 
 * Secrets are stored through Jenkins credentials rather than committed to Git.
 * AWS access is provided through IAM credentials.
-* The Docker application runs as a non-root user.
 * `.gitignore` prevents sensitive/local files from being committed.
 * Infrastructure is managed through Terraform rather than manual configuration.
-
----
-
-## 💡 Key DevOps Concepts Demonstrated
-
-### Zero-Downtime Deployment
-
-Blue remains available while Green is deployed and validated.
-
-### CI/CD Automation
-
-Jenkins automates testing, image building, ECR publishing, and deployment.
-
-### Immutable Container Deployment
-
-Application changes are packaged into Docker images rather than modifying running containers directly.
-
-### Infrastructure as Code
-
-Terraform defines the AWS infrastructure and allows it to be recreated consistently.
-
-### Health Checks
-
-The application provides a `/health` endpoint that can be used to validate the running service.
-
-### Deployment Verification
-
-The `/version` endpoint makes it possible to identify the application version and deployment environment responding to a request.
-
-### Load Balancer Traffic Switching
-
-The ALB listener is updated by the Jenkins pipeline to route production traffic from the Blue target group to the Green target group.
 
 ---
 
 ## 💰 Cost Awareness
 
 AWS resources used by this project can incur charges depending on configuration and usage.
-
-Potential billable resources include:
-
-* ECS Fargate tasks
-* Application Load Balancer
-* Public IPv4 addresses
-* CloudWatch Logs
-* NAT Gateway, if configured
-* ECR storage and data transfer
-
 Always run:
 
 ```bash
@@ -569,17 +415,10 @@ after completing testing when the infrastructure is no longer required.
 
 ---
 
-## 🔮 Future Enhancements
-
-* [ ] Immutable image deployment using Jenkins build number/Git commit SHA
-* [ ] HTTPS with AWS Certificate Manager and custom domain
-* [ ] CloudWatch monitoring and deployment alarms
-* [ ] Automated rollback on deployment failure
-
----
-
 ## 👩‍💻 Author
 
 **Aafiya Nawab**
 
 [GitHub](https://github.com/Aafiyanawab) · [LinkedIn](https://linkedin.com/in/aafiya-nawab-7b66822b9/)
+
+
